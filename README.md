@@ -1,2 +1,65 @@
 # forex-proxy
-Forex proxy for paidy interview
+Http service that returns the latest currency exchange
+
+## How to run
+The local computer must have Java 11 and maven 3.0 or above installed to build/run this application.
+
+1. Pull this repository from master branch, which will have the latest changes.
+2. Run the One Frame API using docker
+   https://hub.docker.com/r/paidyinc/one-frame
+3. Run this application using mvn
+```
+mvn clean spring-boot:run
+```
+Or alternatively, build and run jar
+```
+mvn install
+java –jar target/forex-proxy-0.0.1-SNAPSHOT.jar
+```
+4. The application should be running on port 9090
+```
+$ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
+```
+
+## API interface
+### GET /v1/rates
+| Request params      | Description |
+| ----------- | ----------- |
+| from      | String of currency      |
+| to   | String of currency      |
+
+Acceptable currencies are the following. The request parameter must be an exact match.
+- AUD, CAD, CHF, EUR, GBP, NZD, JPY, SGD, USD
+
+#### Response (application/json)
+The response JSON has the below format
+```
+{
+    "status": <Int>, 
+    "result": {
+        "price": <BigDecimal>
+    },
+    "error": {
+        "message": <String>
+    }
+}
+```
+Example:
+```
+$ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
+{"result":{"price":0.875}}
+```
+
+## Application features
+TODO just some ideas for now
+- If I know the rate of AC and the rate of AB, how do I get CB = AC * 1/AB
+  - Convert rates using JPY as the middle rate ex) USD -> JPY -> AUD
+      - JPYUSD = 0.00867877, AUDJPY = 0.0124126, USDAUD = 1.43023
+      - USDAUD = 1/0.00867877 * (0.0124126) = 1.43022571
+- Use ConcurrentHashMap as cache, storing JPYXXX currency rate
+- If cache is not available or the latest, fetch from one frame api and update cache
+  - cache should expire after 5 minutes
+- Use enum to store currency values, validate that to != from
+- Errors
+  - 400 for unsupported currency, missing parameter
+  - 500 when data can't be fetched, etc.

@@ -1,14 +1,8 @@
 # Compiled class file
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+#Ignore everything in target folder
+target
+!target/forex-proxy-0.0.1-SNAPSHOT.jar
 
 # Package Files #
 *.jar
@@ -19,5 +13,6 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# IntelliJ
+.idea
+.DS_Store
