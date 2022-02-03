@@ -1,1 +1,1 @@
-{"status":400,"error":{"message":"The given currency is not accepted: KRW"}}
+{"status":400,"error":{"message":"CurrencyNotSupportedException: The given currency is not accepted: KRW"}}

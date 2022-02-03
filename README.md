@@ -28,7 +28,6 @@ $ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
 | from      | String of currency      |
 | to   | String of currency      |
 
-TODO throws error if it's not one of the following
 Acceptable currencies are the following. The request parameter must be an exact match.
 - AUD, CAD, CHF, EUR, GBP, NZD, JPY, SGD, USD
 
@@ -51,6 +50,7 @@ $ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
 {"result":{"price":0.875}}
 ```
 
+TODO document about possible exceptions
 ## Application features
 TODO just some ideas for now
 - If I know the rate of AC and the rate of AB, how do I get CB = AC * 1/AB
@@ -60,6 +60,7 @@ TODO just some ideas for now
 - Use ConcurrentHashMap as cache, storing JPYXXX currency rate
 - If cache is not available or the latest, fetch from one frame api and update cache
   - cache should expire after 5 minutes
+  - distributed cache is ideal but will skip it for now
 - Use enum to store currency values, validate that to != from
 - Errors
   - 400 for unsupported currency, missing parameter
