@@ -28,6 +28,7 @@ $ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
 | from      | String of currency      |
 | to   | String of currency      |
 
+TODO throws error if it's not one of the following
 Acceptable currencies are the following. The request parameter must be an exact match.
 - AUD, CAD, CHF, EUR, GBP, NZD, JPY, SGD, USD
 

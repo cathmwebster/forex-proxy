@@ -48,6 +48,24 @@ public class RatesApiControllerTest {
                .andExpect(content().json(readJson("mock/sgdToAud200.json")));
     }
 
+    @Test
+    public void getRatesReturn400UnsupportedCurrency() throws Exception {
+        mockMvc.perform(get("/v1/rates")
+                                .param("from", "KRW")
+                                .param("to", "AUD"))
+               .andExpect(status().isBadRequest())
+               .andExpect(content().json(readJson("mock/unsupportedCurrency400.json")));
+    }
+
+    @Test
+    public void getRatesReturn400InvalidRatesRequest() throws Exception {
+        mockMvc.perform(get("/v1/rates")
+                                .param("from", "USD")
+                                .param("to", "USD"))
+               .andExpect(status().isBadRequest())
+               .andExpect(content().json(readJson("mock/invalidRatesRequest400.json")));
+    }
+
     private String readJson(String path) throws IOException {
         return new String(new ClassPathResource(path)
                                   .getInputStream()
