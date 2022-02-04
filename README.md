@@ -66,3 +66,9 @@ TODO just some ideas for now
 - Errors
   - 400 for unsupported currency, missing parameter
   - 500 when data can't be fetched, etc.
+- Issues with caching (probably won't have time to work on it but will leave notes)
+  - if we cannot update the currency values due to one frame api error, the cache will be evicted
+  - what if one frame api returns rates that are older than 5 minutes
+  - we can keep a timestamp of when the data was fetched, the time_stamp response from one frame, and expire at
+  - we could instead keep the value in the cache, but update expire time by +5 minutes (?)
+  - how do we test this cache... 

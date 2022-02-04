@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.cache.CacheManager;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -25,8 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RatesCacheService {
 
+    // The cache will expire after 300 seconds = 5 minutes
+    // since the cache will be refreshed every 90 seconds
+    // there will be two more "re-try" before the cache expires
+    private static final long EXPIRE_SECONDS = TimeUnit.SECONDS.toNanos(300);
+
     private final OneFrameRateApiClient oneFrameRateApiClient;
-    private final Cache<String, RatesCacheObject> ratesCache;
+    private final Cache<Currency, RatesCacheObject> ratesCache;
 
     public RatesCacheService(OneFrameRateApiClient oneFrameRateApiClient) {
         this.ratesCache = Caffeine.newBuilder()
@@ -35,7 +38,18 @@ public class RatesCacheService {
         this.oneFrameRateApiClient = oneFrameRateApiClient;
     }
 
-    // this method will be called by an executor service to refresh every x minutes
+    @PostConstruct
+    public void init() {
+        // schedule the executor to refresh the cache every 90 seconds
+        // 86400 seconds per day / 1000 req per day = 86 requests allowed per day
+        // round up to 90 seconds for a cleaner period
+        final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+        executor.scheduleAtFixedRate(this::refreshCache,
+                                     0,
+                                     90,
+                                     TimeUnit.SECONDS);
+    }
+
     private void refreshCache() {
         final var request = Currency.getAllValues()
                                             .stream().filter(c -> c != Currency.JPY)
@@ -49,7 +63,35 @@ public class RatesCacheService {
             return;
         }
 
+        // put each response into cache
+        // we could run this async but will skip for now
+        for (final var res : response) {
+            // create cache object, set expire seconds to the default
+            final var obj = new RatesCacheObject(res.getPrice(),
+                                                 res.getTimestampInLong(),
+                                                 EXPIRE_SECONDS);
+            put(Currency.valueOf(res.getTo()), obj);
+        }
+        
         log.info("Refreshing cache...");
+    }
+
+    /**
+     * Gets key or return null if not present
+     * @param key
+     * @return
+     */
+    public RatesCacheObject get(Currency key) {
+        return ratesCache.getIfPresent(key);
+    }
+
+    /**
+     * Puts key, value
+     * @param key
+     * @return
+     */
+    public void put(Currency key, RatesCacheObject value) {
+        ratesCache.put(key, value);
     }
 
     private String generateRequestParam(Currency to) {

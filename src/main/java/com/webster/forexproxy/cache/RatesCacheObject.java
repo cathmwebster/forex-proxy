@@ -2,10 +2,13 @@ package com.webster.forexproxy.cache;
 
 import java.math.BigDecimal;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
-@Getter
+@Data
+@AllArgsConstructor
 public class RatesCacheObject {
     private BigDecimal price;
     private long timestamp;
+    private long expiresNanos;
 }

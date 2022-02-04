@@ -1,22 +1,23 @@
 package com.webster.forexproxy.cache;
 
 import com.github.benmanes.caffeine.cache.Expiry;
+import com.webster.forexproxy.model.Currency;
 
-class CacheExpiry implements Expiry<String, RatesCacheObject> {
+class CacheExpiry implements Expiry<Currency, RatesCacheObject> {
 
     @Override
-    public long expireAfterCreate(String key, RatesCacheObject value, long currentTime) {
-        return value.getExpireAt();
+    public long expireAfterCreate(Currency key, RatesCacheObject value, long currentTime) {
+        return value.getExpiresNanos();
     }
 
     @Override
-    public long expireAfterUpdate(String key, RatesCacheObject value, long currentTime,
+    public long expireAfterUpdate(Currency key, RatesCacheObject value, long currentTime,
                                   long currentDuration) {
-        return value.getExpireAt();
+        return value.getExpiresNanos();
     }
 
     @Override
-    public long expireAfterRead(String key, RatesCacheObject value, long currentTime,
+    public long expireAfterRead(Currency key, RatesCacheObject value, long currentTime,
                                 long currentDuration) {
         return currentDuration;
     }

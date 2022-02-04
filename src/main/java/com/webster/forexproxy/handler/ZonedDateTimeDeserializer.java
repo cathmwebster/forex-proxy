@@ -17,6 +17,7 @@ public class ZonedDateTimeDeserializer extends JsonDeserializer<ZonedDateTime> {
         try {
             return ZonedDateTime.parse(jsonParser.getText(), DateTimeFormatter.ofPattern(ZONED_DATE_TIME_FORMAT));
         } catch (IOException e) {
+            // there were some cases where one frame api returns an invalid timestamp format
             return null;
         }
     }
