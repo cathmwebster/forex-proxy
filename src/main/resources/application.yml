@@ -1,0 +1,3 @@
+one-frame:
+  baseUri: http://localhost:8080/rates
+  token: 10dc303535874aeccc86a8251e6992f5
