@@ -68,12 +68,12 @@ public class RatesCacheService {
         for (final var res : response) {
             // create cache object, set expire seconds to the default
             final var obj = new RatesCacheObject(res.getPrice(),
-                                                 res.getTimestampInLong(),
+                                                 res.getTimestamp(),
                                                  EXPIRE_SECONDS);
             put(Currency.valueOf(res.getTo()), obj);
         }
         
-        log.info("Refreshing cache...");
+        log.info("Count of refreshed cache values: {}", response.size());
     }
 
     /**

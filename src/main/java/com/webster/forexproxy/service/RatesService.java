@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.webster.forexproxy.cache.RatesCacheService;
 import com.webster.forexproxy.exception.InvalidRatesRequestException;
 import com.webster.forexproxy.model.Currency;
 import com.webster.forexproxy.model.Rate;
@@ -13,9 +14,12 @@ import com.webster.forexproxy.oneframe.client.OneFrameRateApiClient;
 public class RatesService {
 
     private final OneFrameRateApiClient oneFrameRateApiClient;
+    private final RatesCacheService ratesCacheService;
 
-    public RatesService(OneFrameRateApiClient oneFrameRateApiClient) {
+    public RatesService(OneFrameRateApiClient oneFrameRateApiClient,
+                        RatesCacheService ratesCacheService) {
         this.oneFrameRateApiClient = oneFrameRateApiClient;
+        this.ratesCacheService = ratesCacheService;
     }
 
     /**
@@ -32,7 +36,6 @@ public class RatesService {
         final var rates = oneFrameRateApiClient.getRates(List.of(generateRequestParam(from, to)));
         return Rate.of(rates.get(0).getPrice());
     }
-
     private String generateRequestParam(Currency from, Currency to) {
         return from.toString() + to.toString();
     }
