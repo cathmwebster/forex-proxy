@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Json handler class for HttpClient response
@@ -21,6 +22,7 @@ public class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
     public JsonBodyHandler(Class<T> clazz) {
         this.clazz = clazz;
         objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
                 .configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
