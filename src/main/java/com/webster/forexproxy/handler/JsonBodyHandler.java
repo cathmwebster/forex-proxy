@@ -8,6 +8,11 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Json handler class for HttpClient response
+ *
+ * @param <T>
+ */
 public class JsonBodyHandler<T> implements HttpResponse.BodyHandler<T> {
 
     private final Class<T> clazz;

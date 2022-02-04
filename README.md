@@ -57,9 +57,10 @@ TODO just some ideas for now
   - Convert rates using JPY as the middle rate ex) USD -> JPY -> AUD
       - JPYUSD = 0.00867877, AUDJPY = 0.0124126, USDAUD = 1.43023
       - USDAUD = 1/0.00867877 * (0.0124126) = 1.43022571
-- Use ConcurrentHashMap as cache, storing JPYXXX currency rate
-- If cache is not available or the latest, fetch from one frame api and update cache
+- Use caffeine lib for cache https://github.com/ben-manes/caffeine
+  - store every JPYXXX pair rates in the cache
   - cache should expire after 5 minutes
+  - if the rate is not available in the cache, fetch from one frame api and update cache
   - distributed cache is ideal but will skip it for now
 - Use enum to store currency values, validate that to != from
 - Errors
