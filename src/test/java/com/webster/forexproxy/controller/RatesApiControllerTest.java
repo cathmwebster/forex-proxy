@@ -36,7 +36,7 @@ public class RatesApiControllerTest {
     @Test
     public void getRatesJpyToUsdReturn200() throws Exception {
         given(ratesService.getRates(eq(Currency.JPY), eq(Currency.USD)))
-                .willReturn(Rate.of(BigDecimal.ONE));
+                .willReturn(Rate.of(new BigDecimal("0.71810472617368925")));
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "JPY")
                                 .param("to", "USD"))
@@ -47,7 +47,7 @@ public class RatesApiControllerTest {
     @Test
     public void getRatesUsdToJpyReturn200() throws Exception {
         given(ratesService.getRates(eq(Currency.USD), eq(Currency.JPY)))
-                .willReturn(Rate.of(BigDecimal.ONE));
+                .willReturn(Rate.of(new BigDecimal(0.71810472617368925)));
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "USD")
                                 .param("to", "JPY"))
@@ -58,7 +58,7 @@ public class RatesApiControllerTest {
     @Test
     public void getRatesSgdToAudReturn200() throws Exception {
         given(ratesService.getRates(eq(Currency.SGD), eq(Currency.AUD)))
-                .willReturn(Rate.of(BigDecimal.ONE));
+                .willReturn(Rate.of(new BigDecimal(0.415700693982798025)));
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "SGD")
                                 .param("to", "AUD"))
