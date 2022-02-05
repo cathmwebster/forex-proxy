@@ -36,10 +36,10 @@ public class RatesCacheService {
     private final Cache<Currency, RatesCacheObject> ratesCache = Caffeine.newBuilder()
                                                                          .expireAfter(new CacheExpiry())
                                                                          .build();
+    final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
     @PostConstruct
     public void init() {
-        final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(this::refreshCache,
                                      cacheConfig.getInitialDelaySeconds(),
                                      cacheConfig.getRefreshPeriodSeconds(),
