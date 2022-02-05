@@ -1,6 +1,7 @@
 package com.webster.forexproxy.service;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 import org.springframework.stereotype.Service;
 
@@ -8,17 +9,13 @@ import com.webster.forexproxy.cache.RatesCacheService;
 import com.webster.forexproxy.exception.InvalidRatesRequestException;
 import com.webster.forexproxy.model.Currency;
 import com.webster.forexproxy.model.Rate;
-import com.webster.forexproxy.oneframe.client.OneFrameRateApiClient;
 
 @Service
 public class RatesService {
 
-    private final OneFrameRateApiClient oneFrameRateApiClient;
     private final RatesCacheService ratesCacheService;
 
-    public RatesService(OneFrameRateApiClient oneFrameRateApiClient,
-                        RatesCacheService ratesCacheService) {
-        this.oneFrameRateApiClient = oneFrameRateApiClient;
+    public RatesService(RatesCacheService ratesCacheService) {
         this.ratesCacheService = ratesCacheService;
     }
 
@@ -33,10 +30,14 @@ public class RatesService {
             throw new InvalidRatesRequestException();
         }
 
-        final var rates = oneFrameRateApiClient.getRates(List.of(generateRequestParam(from, to)));
-        return Rate.of(rates.get(0).getPrice());
-    }
-    private String generateRequestParam(Currency from, Currency to) {
-        return from.toString() + to.toString();
+        // TODO null check
+        if (from == Currency.JPY) {
+            return Rate.of(ratesCacheService.get(to).getPrice());
+        } else if (to == Currency.JPY) {
+            return Rate.of(BigDecimal.ONE.divide(ratesCacheService.get(from).getPrice(), MathContext.DECIMAL64));
+        } else {
+            var inversed = BigDecimal.ONE.divide(ratesCacheService.get(from).getPrice(), MathContext.DECIMAL64);
+            return Rate.of(inversed.multiply(ratesCacheService.get(to).getPrice(), MathContext.DECIMAL64));
+        }
     }
 }
