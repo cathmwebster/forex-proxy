@@ -24,4 +24,10 @@ public class GlobalControllerExceptionHandler {
     public ApiErrorResponse dataNotAvailableException(DataNotAvailableException ex) {
         return new ApiErrorResponse(500, ex.getMessage());
     }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiErrorResponse dataNotAvailableException(Exception ex) {
+        return new ApiErrorResponse(500, ex.getMessage());
+    }
 }

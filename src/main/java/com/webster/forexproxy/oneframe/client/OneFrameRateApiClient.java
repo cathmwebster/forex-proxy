@@ -14,17 +14,15 @@ import com.webster.forexproxy.handler.JsonBodyHandler;
 import com.webster.forexproxy.oneframe.config.OneFrameConfiguration;
 import com.webster.forexproxy.oneframe.model.OneFrameRateApiResponse;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class OneFrameRateApiClient {
 
     private final OneFrameConfiguration oneFrameConfiguration;
-
-    public OneFrameRateApiClient(OneFrameConfiguration oneFrameConfiguration) {
-        this.oneFrameConfiguration = oneFrameConfiguration;
-    }
 
     /**
      * Calls One Frame Rate API to fetch currency rates for the given pairs of currencies
@@ -48,7 +46,6 @@ public class OneFrameRateApiClient {
             }
             return Arrays.asList(response.body());
         } catch (IOException | InterruptedException e) {
-            log.error("Unxpected error occured when calling One Frame Rate API", e);
             throw new OneFrameApiException("Unxpected error occured when calling One Frame Rate API");
         }
     }

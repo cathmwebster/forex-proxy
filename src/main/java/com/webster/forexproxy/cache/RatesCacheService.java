@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -17,36 +18,31 @@ import com.webster.forexproxy.model.Currency;
 import com.webster.forexproxy.oneframe.client.OneFrameRateApiClient;
 import com.webster.forexproxy.oneframe.model.OneFrameRateApiResponse;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Caches the JPY->XXX rates from One Frame Api
+ * The cache key is XXX currency
+ * The executor is scheduled to refresh the cache every x seconds
+ */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RatesCacheService {
 
-    // The cache will expire after 300 seconds = 5 minutes
-    // since the cache will be refreshed every 90 seconds
-    // there will be two more "re-try" before the cache expires
-    private static final long EXPIRE_SECONDS = TimeUnit.SECONDS.toNanos(300);
-
+    private final CacheConfig cacheConfig;
     private final OneFrameRateApiClient oneFrameRateApiClient;
-    private final Cache<Currency, RatesCacheObject> ratesCache;
-
-    public RatesCacheService(OneFrameRateApiClient oneFrameRateApiClient) {
-        this.ratesCache = Caffeine.newBuilder()
-                                  .expireAfter(new CacheExpiry())
-                                  .build();
-        this.oneFrameRateApiClient = oneFrameRateApiClient;
-    }
+    private final Cache<Currency, RatesCacheObject> ratesCache = Caffeine.newBuilder()
+                                                                         .expireAfter(new CacheExpiry())
+                                                                         .build();
 
     @PostConstruct
     public void init() {
-        // schedule the executor to refresh the cache every 90 seconds
-        // 86400 seconds per day / 1000 req per day = 86 requests allowed per day
-        // round up to 90 seconds for a cleaner period
         final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
         executor.scheduleAtFixedRate(this::refreshCache,
-                                     0,
-                                     90,
+                                     cacheConfig.getInitialDelaySeconds(),
+                                     cacheConfig.getRefreshPeriodSeconds(),
                                      TimeUnit.SECONDS);
     }
 
@@ -59,17 +55,14 @@ public class RatesCacheService {
         try {
             response = oneFrameRateApiClient.getRates(request);
         } catch (OneFrameApiException e) {
-            log.error("Failed to refresh cache due to exception");
+            log.error("Failed to refresh cache due to exception.", e);
             return;
         }
 
-        // put each response into cache
-        // we could run this async but will skip for now
         for (final var res : response) {
-            // create cache object, set expire seconds to the default
             final var obj = new RatesCacheObject(res.getPrice(),
                                                  res.getTimestamp(),
-                                                 EXPIRE_SECONDS);
+                                                 cacheConfig.getDefaultExpireNanos());
             put(Currency.valueOf(res.getTo()), obj);
         }
         
@@ -81,12 +74,13 @@ public class RatesCacheService {
      * @param key
      * @return
      */
+    @Nullable
     public RatesCacheObject get(Currency key) {
         return ratesCache.getIfPresent(key);
     }
 
     /**
-     * Puts key, value
+     * Puts key, value into cache
      * @param key
      * @return
      */

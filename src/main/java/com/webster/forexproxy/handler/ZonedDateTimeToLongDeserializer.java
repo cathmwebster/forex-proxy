@@ -18,9 +18,10 @@ public class ZonedDateTimeToLongDeserializer extends JsonDeserializer<Long> {
             return ZonedDateTime.parse(jsonParser.getText(),
                                        DateTimeFormatter.ofPattern(ZONED_DATE_TIME_FORMAT))
                                 .toEpochSecond();
-        } catch (IOException e) {
+        } catch (Exception e) {
             // there were some cases where one frame api returns an invalid timestamp format
-            return null;
+           System.out.println("invalid format");
+            return 0L;
         }
     }
 }

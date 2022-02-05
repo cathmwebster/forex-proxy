@@ -10,13 +10,14 @@ import com.webster.forexproxy.model.Rate;
 import com.webster.forexproxy.model.api.ApiResponseBody;
 import com.webster.forexproxy.service.RatesService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/v1")
+@RequiredArgsConstructor
 public class RatesApiController {
 
     private final RatesService ratesService;
-
-    public RatesApiController(RatesService ratesService) {this.ratesService = ratesService;}
 
     @GetMapping("rates")
     public ApiResponseBody<Rate> getRates(@RequestParam("from") String from,

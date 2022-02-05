@@ -79,12 +79,17 @@ public class OneFrameRateApiClientTest {
     }
 
     @Test
-    void testGetEmptyBodyThrowException() throws Exception {
+    void testGetInvalidTimestampReturnResponse() throws Exception {
         wireMockRule.stubFor(get(urlPathMatching("/rates"))
                                      .withHeader("token", equalTo("testtoken"))
                                      .willReturn(aResponse()
-                                                         .withStatus(200)));
-        assertThrows(OneFrameApiException.class, () -> oneFrameRateApiClient.getRates(REQUEST_ALL_CURRENCIES));
+                                                         .withStatus(200)
+                                                         .withHeader("content-type", "application/json")
+                                                         .withBody(readJson("oneframe/invalidFormatRes.json"))));
+        final var actual = oneFrameRateApiClient.getRates(REQUEST_ALL_CURRENCIES);
+        assertThat(actual).hasSize(8);
+        assertThat(actual).extracting("timestamp").containsOnlyOnce(0L);
+        assertThat(actual).extracting("timestamp").contains(1643702044L);
     }
 
     @Test

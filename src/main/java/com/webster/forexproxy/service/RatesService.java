@@ -13,17 +13,17 @@ import com.webster.forexproxy.exception.InvalidRatesRequestException;
 import com.webster.forexproxy.model.Currency;
 import com.webster.forexproxy.model.Rate;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class RatesService {
 
     private final RatesCacheService ratesCacheService;
 
-    public RatesService(RatesCacheService ratesCacheService) {
-        this.ratesCacheService = ratesCacheService;
-    }
-
     /**
-     * Fetches the currency rate of from -> to from One Frame and returns response
+     * Returns the currency rate of from -> to currencies
+     *
      * @param from currency
      * @param to currency
      * @return the rate of currencies from -> to
