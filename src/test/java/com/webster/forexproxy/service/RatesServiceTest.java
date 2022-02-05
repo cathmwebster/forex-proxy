@@ -21,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.webster.forexproxy.cache.RatesCacheObject;
 import com.webster.forexproxy.cache.RatesCacheService;
+import com.webster.forexproxy.exception.DataNotAvailableException;
 import com.webster.forexproxy.exception.InvalidRatesRequestException;
 import com.webster.forexproxy.model.Currency;
 import com.webster.forexproxy.oneframe.client.OneFrameRateApiClient;
@@ -89,7 +90,6 @@ public class RatesServiceTest {
 
     @Test
     public void testGetRatesNoCache() {
-        given(ratesCacheService.get(Currency.AUD)).willReturn(null);
-        // test that exception is thrown
+        assertThrows(DataNotAvailableException.class, () -> ratesService.getRates(Currency.USD, Currency.AUD));
     }
 }

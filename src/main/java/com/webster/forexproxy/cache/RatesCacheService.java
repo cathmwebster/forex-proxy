@@ -59,7 +59,7 @@ public class RatesCacheService {
         try {
             response = oneFrameRateApiClient.getRates(request);
         } catch (OneFrameApiException e) {
-            log.error("Failed to refresh cache due to exception. ", e);
+            log.error("Failed to refresh cache due to exception");
             return;
         }
 

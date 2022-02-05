@@ -19,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.webster.forexproxy.exception.DataNotAvailableException;
 import com.webster.forexproxy.exception.InvalidRatesRequestException;
 import com.webster.forexproxy.model.Currency;
 import com.webster.forexproxy.model.Rate;
@@ -83,6 +84,16 @@ public class RatesApiControllerTest {
                                 .param("to", "USD"))
                .andExpect(status().isBadRequest())
                .andExpect(content().json(readJson("mock/invalidRatesRequest400.json")));
+    }
+
+    @Test
+    public void getRatesReturn500DataNotAvailable() throws Exception {
+        given(ratesService.getRates(Currency.AUD, Currency.USD)).willThrow(new DataNotAvailableException());
+        mockMvc.perform(get("/v1/rates")
+                                .param("from", "AUD")
+                                .param("to", "USD"))
+               .andExpect(status().isInternalServerError())
+               .andExpect(content().json(readJson("mock/dataNotAvailable500.json")));
     }
 
     private String readJson(String path) throws IOException {
