@@ -11,11 +11,11 @@ import lombok.Data;
 @ConfigurationProperties("cache")
 @Data
 public class CacheConfig {
-    private long defaultExpireSeconds;
+    private long expireSeconds;
     private long initialDelaySeconds;
     private long refreshPeriodSeconds;
 
     public long getDefaultExpireNanos() {
-        return TimeUnit.SECONDS.toNanos(defaultExpireSeconds);
+        return TimeUnit.SECONDS.toNanos(expireSeconds);
     }
 }

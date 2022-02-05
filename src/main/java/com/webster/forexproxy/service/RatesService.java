@@ -35,16 +35,15 @@ public class RatesService {
 
         if (from == Currency.JPY) {
             final var cachedRate = getFromCacheOrThrowException(to);
-            return Rate.of(cachedRate.getPrice());
+            return Rate.of(cachedRate.getPrice(), cachedRate.getTimestamp());
         } else if (to == Currency.JPY) {
-            final var cachedFromRate = getFromCacheOrThrowException(from);
-            return Rate.of(BigDecimal.ONE.divide(cachedFromRate.getPrice(), MathContext.DECIMAL64));
+            final var cachedRate = getFromCacheOrThrowException(from);
+            return Rate.of(getInverse(cachedRate.getPrice()), cachedRate.getTimestamp());
         } else {
             final var cachedFromRate = getFromCacheOrThrowException(from);
             final var cachedToRate = getFromCacheOrThrowException(to);
-            final var inversed = BigDecimal.ONE.divide(cachedFromRate.getPrice(), MathContext.DECIMAL64);
-            final var converted = inversed.multiply(cachedToRate.getPrice(), MathContext.DECIMAL64);
-            return Rate.of(converted);
+            return Rate.of(convertByInverseOnFrom(cachedFromRate.getPrice(), cachedToRate.getPrice()),
+                           Math.max(cachedFromRate.getTimestamp(), cachedToRate.getTimestamp()));
         }
     }
 
@@ -57,5 +56,14 @@ public class RatesService {
     private RatesCacheObject getFromCacheOrThrowException(Currency key) throws DataNotAvailableException {
         return Optional.ofNullable(ratesCacheService.get(key))
                 .orElseThrow(DataNotAvailableException::new);
+    }
+
+    private BigDecimal getInverse(BigDecimal price) {
+        return BigDecimal.ONE.divide(price, MathContext.DECIMAL64);
+    }
+
+    private BigDecimal convertByInverseOnFrom(BigDecimal fromPrice, BigDecimal toPrice) {
+        return getInverse(fromPrice)
+                .multiply(toPrice, MathContext.DECIMAL64);
     }
 }

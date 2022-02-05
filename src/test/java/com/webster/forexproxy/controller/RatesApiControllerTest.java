@@ -1,6 +1,5 @@
 package com.webster.forexproxy.controller;
 
-import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,35 +35,35 @@ public class RatesApiControllerTest {
 
     @Test
     public void getRatesJpyToUsdReturn200() throws Exception {
-        given(ratesService.getRates(eq(Currency.JPY), eq(Currency.USD)))
-                .willReturn(Rate.of(new BigDecimal("0.71810472617368925")));
+        given(ratesService.getRates(Currency.JPY, Currency.USD))
+                .willReturn(Rate.of(new BigDecimal("0.71810472617368925"), 1644042884));
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "JPY")
                                 .param("to", "USD"))
                .andExpect(status().isOk())
-               .andExpect(content().json(readJson("mock/jpyToUsd200.json")));
+               .andExpect(content().json(readJson("mock/jpyToUsd200.json"), true));
     }
 
     @Test
     public void getRatesUsdToJpyReturn200() throws Exception {
-        given(ratesService.getRates(eq(Currency.USD), eq(Currency.JPY)))
-                .willReturn(Rate.of(new BigDecimal(0.71810472617368925)));
+        given(ratesService.getRates(Currency.USD, Currency.JPY))
+                .willReturn(Rate.of(new BigDecimal("0.71810472617368925"), 1644042884));
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "USD")
                                 .param("to", "JPY"))
                .andExpect(status().isOk())
-               .andExpect(content().json(readJson("mock/usdToJpy200.json")));
+               .andExpect(content().json(readJson("mock/usdToJpy200.json"), true));
     }
 
     @Test
     public void getRatesSgdToAudReturn200() throws Exception {
-        given(ratesService.getRates(eq(Currency.SGD), eq(Currency.AUD)))
-                .willReturn(Rate.of(new BigDecimal(0.415700693982798025)));
+        given(ratesService.getRates(Currency.SGD, Currency.AUD))
+                .willReturn(Rate.of(new BigDecimal("0.415700693982798025"), 1644042884));
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "SGD")
                                 .param("to", "AUD"))
                .andExpect(status().isOk())
-               .andExpect(content().json(readJson("mock/sgdToAud200.json")));
+               .andExpect(content().json(readJson("mock/sgdToAud200.json"), true));
     }
 
     @Test
