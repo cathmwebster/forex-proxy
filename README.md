@@ -37,7 +37,8 @@ The response JSON has the below format
 {
     "status": <Int>, 
     "result": {
-        "price": <BigDecimal>
+        "price": <BigDecimal>,
+        "timestamp: <Long>
     },
     "error": {
         "message": <String>
@@ -47,7 +48,7 @@ The response JSON has the below format
 Example:
 ```
 $ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
-{"result":{"price":0.875}}
+{"status":200,"result":{"price":0.71810472617368925,"timestamp":1644042884}}
 ```
 
 TODO document about possible exceptions
