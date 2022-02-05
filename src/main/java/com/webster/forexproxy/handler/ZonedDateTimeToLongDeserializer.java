@@ -20,7 +20,6 @@ public class ZonedDateTimeToLongDeserializer extends JsonDeserializer<Long> {
                                 .toEpochSecond();
         } catch (Exception e) {
             // there were some cases where one frame api returns an invalid timestamp format
-           System.out.println("invalid format");
             return 0L;
         }
     }
