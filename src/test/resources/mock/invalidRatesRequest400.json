@@ -1,1 +1,1 @@
-{"status":400,"error":{"message":"InvalidRatesRequestException: the requested currencies from and to cannot be the same currency"}}
+{"status":400,"error":{"message":"The requested currency from and to cannot be the same"}}

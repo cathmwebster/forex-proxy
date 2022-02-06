@@ -19,7 +19,7 @@ public enum Currency {
         try {
             return Currency.valueOf(currency);
         } catch (Exception e) {
-            throw new CurrencyNotSupportedException("CurrencyNotSupportedException: The given currency is not accepted: " + currency);
+            throw new CurrencyNotSupportedException("The requested currency is not supported by this api: " + currency);
         }
     }
 }
