@@ -1,8 +1,8 @@
 one-frame:
-  baseUri: http://localhost:8080/rates
+  base-uri: http://localhost:8080/rates
   token: 10dc303535874aeccc86a8251e6992f5
 
 cache:
   expire-seconds: 300
-  initial-delay-seconds: 0
-  refresh-period-seconds: 90
+  initial-delay-ms: 0
+  refresh-period-ms: 90000

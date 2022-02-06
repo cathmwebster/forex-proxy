@@ -1,0 +1,8 @@
+one-frame:
+  base-uri: http://localhost:9000/rates
+  token: testtoken
+
+cache:
+  expire-seconds: 300
+  initial-delay-ms: 0
+  refresh-period-ms: 1000
