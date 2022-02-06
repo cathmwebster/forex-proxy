@@ -1,6 +1,14 @@
 # forex-proxy
 Http service that returns the latest currency exchange
 
+This web service uses the cross currency exchange method to return the exchange rate A→C.
+By default, JPY→B　is used as the base currency rate. The formula is as followed:
+
+```AC = 1/AB * BC```
+
+Because of this calculation, the returned rate is implied from the ratio of two currencies other than the base currency. 
+Also, the web service caches the response from One Frame and will not return rate older than five minutes.
+
 ## How to run
 The local computer must have Java 11 and maven 3.0 or above installed to build/run this application.
 
@@ -45,31 +53,57 @@ The response JSON has the below format
     }
 }
 ```
+
+| Field      | Type      | Description |
+| ----------- | ----------- | ----------- |
+| status      | Integer | HTTP status code |
+| result   | Object | The result body |
+| ｜├ price | BigDecimal |  The exchange rate |
+| ｜├ timestamp | Long | The timestamp of the retrieved rate in UTC epoch miliseconds  |
+| error   | Object | The error body |
+| ｜├ message | String |  The error description |
+
+The following are possible errors:
+
+| Error      | Status code      |
+| ----------- | ----------- |
+| CurrencyNotSupportedException      | 400 |
+| InvalidRatesRequestException      | 400 |
+| DataNotAvailableException      | 500 |
+| InternalServerError      | 500 |
+
 Example:
 ```
 $ curl 'localhost:9090/v1/rates?from=JPY&to=USD'
 {"status":200,"result":{"price":0.71810472617368925,"timestamp":1644042884}}
 ```
 
-TODO document about possible exceptions
+## Initial ideas
+To follow One Frame's rate limit and in order for forex-proxy to support 10,000+ requests a day, the One Frame response needs to be cached for at most five minutes by requirement. However with the current number supported currencies (and assuming that more will be supported later), it's impossible to fulfill both One Frame's and forex-proxy's requirements if we call One Frame for every AB pairs possible.
+
+The first idea was to get and cache unique pairs AB and if we need the rate of BA, the service will just return the inverse 1/AB. Even then, that's still 28 possible pairs of currently supported currencies and the service will not fulfill the requirements. One Frame accepts a list of pairs in one call, but it would be inefficient to send a large number of requests in one call.
+
+This reminded me of the cross currency exchange formula, where if we know the exchange rate AB and AC, we can also calculate BC and CB. With the currently supported currencies and using JPY as the base currency, 8 pairs in one request would not be so large - this service will fetch the rate of every JPYXXX pairs in one api call, then cache the response for up to five minutes.
+
 ## Application features
-TODO just some ideas for now
-- If I know the rate of AC and the rate of AB, how do I get CB = AC * 1/AB
-  - Convert rates using JPY as the middle rate ex) USD -> JPY -> AUD
-      - JPYUSD = 0.00867877, AUDJPY = 0.0124126, USDAUD = 1.43023
-      - USDAUD = 1/0.00867877 * (0.0124126) = 1.43022571
-- Use caffeine lib for cache https://github.com/ben-manes/caffeine
-  - store every JPYXXX pair rates in the cache
-  - cache should expire after 5 minutes
-  - if the rate is not available in the cache, fetch from one frame api and update cache
-  - distributed cache is ideal but will skip it for now
-- Use enum to store currency values, validate that to != from
-- Errors
-  - 400 for unsupported currency, missing parameter
-  - 500 when data can't be fetched, etc.
-- Issues with caching (probably won't have time to work on it but will leave notes)
-  - if we cannot update the currency values due to one frame api error, the cache will be evicted
-  - what if one frame api returns rates that are older than 5 minutes
-  - we can keep a timestamp of when the data was fetched, the time_stamp response from one frame, and expire at
-  - we could instead keep the value in the cache, but update expire time by +5 minutes (?)
-  - how do we test this cache... 
+ - For the given pair of currencies, the API will respond with the rate and timestamp of fetched rate
+ - Use a scheduler to call One Frame API to get the rates of every JPYXXX pairs by sending all pairs in one request
+   - 86400 seconds in a day / 1000 req per day to One Frame = 1 request every 86.4 seconds in a day allowed -> round up to 90 seconds
+   - The scheduler will execute the action every 90 seconds
+ - The API will validate that the requested currencies are supported, else the API will respond with an error
+ - Use in memory cache (https://github.com/ben-manes/caffeine) to cache the rates, expires after five minutes
+ - If the requested rates are not in the cache, the API will response with an error
+ 
+## Future improvements
+ - A distributed cache will be needed if forex-proxy will run on multiple servers
+   - The cache should be synchronized amongst all nodes
+   - Only one server should be scheduled to refresh the cache
+ - The response from One Frame could be validated better
+   - I think there could be better handling of parsing One Frame API response
+   - What if time_stamp is older than 5 minutes? Forex-proxy assumes that One Frame will respond with time_stamp that is the current datetime.
+   - The service will ignore timestamp that cannot be parsed (sometime One Frame responds with an invalid format), but the rate will be available to forex-proxy users anyways
+   - The above points draws the greyline of forex-proxy requirement that the rate returned will not be older than 5 minutes
+ - The rates that are not JPY based can be cached based on most requested pairs
+   - This will avoid calculating the rate by formula repeatedly and give a faster response to the user
+ - If the list of supported currencies grow, the refreshing stragety will need to be revised
+   - This means that the size of pairs requested to One Frame will also grow
