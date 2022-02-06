@@ -2,32 +2,25 @@ package com.webster.forexproxy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.webster.forexproxy.cache.RatesCacheObject;
 import com.webster.forexproxy.cache.RatesCacheService;
 import com.webster.forexproxy.exception.DataNotAvailableException;
 import com.webster.forexproxy.exception.InvalidRatesRequestException;
 import com.webster.forexproxy.model.Currency;
-import com.webster.forexproxy.oneframe.client.OneFrameRateApiClient;
-import com.webster.forexproxy.oneframe.model.OneFrameRateApiResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RatesServiceTest {
 
     private static final long DEFAULT_CACHE_EXPIRE_NANOS = TimeUnit.SECONDS.toNanos(300);
@@ -39,7 +32,7 @@ public class RatesServiceTest {
     private RatesCacheService ratesCacheService;
 
     @Test
-    public void testGetRatesFromJPYToUSD() throws Exception {
+    void testGetRatesFromJPYToUSD() throws Exception {
         var timestamp = Instant.now().getEpochSecond();
         var expected = new BigDecimal("0.71810472617368925");
         final var mockCache = new RatesCacheObject(expected, timestamp, DEFAULT_CACHE_EXPIRE_NANOS);
@@ -51,7 +44,7 @@ public class RatesServiceTest {
     }
 
     @Test
-    public void testGetRatesFromUSDToJPY() throws Exception {
+    void testGetRatesFromUSDToJPY() throws Exception {
         var timestamp = Instant.now().getEpochSecond();
         final var mockCache = new RatesCacheObject(new BigDecimal("0.7181047261736892"),
                                                    timestamp,
@@ -65,7 +58,7 @@ public class RatesServiceTest {
     }
 
     @Test
-    public void testGetRatesFromUSDToAUD() throws Exception {
+    void testGetRatesFromUSDToAUD() throws Exception {
         var timestamp = Instant.now().getEpochSecond();
         final var mockCacheUSD = new RatesCacheObject(new BigDecimal("0.54908647280612891"),
                                                       timestamp,
@@ -83,13 +76,13 @@ public class RatesServiceTest {
     }
 
     @Test
-    public void testGetRateThrowsInvalidRequestException() {
+    void testGetRateThrowsInvalidRequestException() {
         assertThrows(InvalidRatesRequestException.class,
                      () -> ratesService.getRates(Currency.JPY, Currency.JPY));
     }
 
     @Test
-    public void testGetRatesNoCache() {
+    void testGetRatesNoCache() {
         assertThrows(DataNotAvailableException.class, () -> ratesService.getRates(Currency.USD, Currency.AUD));
     }
 }

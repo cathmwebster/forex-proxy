@@ -12,11 +12,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.webster.forexproxy.exception.OneFrameApiException;
@@ -27,24 +28,28 @@ public class OneFrameRateApiClientTest {
     private static final List<String> REQUEST_ALL_CURRENCIES =
             List.of("JPYAUD", "JPYCAD", "JPYCHF", "JPYEUR", "JPYGBP", "JPYNZD", "JPYSGD", "JPYUSD");
 
-    @Rule
-    public WireMockRule wireMockRule;
+    public WireMockServer wireMockServer;
 
     private OneFrameRateApiClient oneFrameRateApiClient;
 
-    @Before
+    @BeforeEach
     public void init() {
-        wireMockRule = new WireMockRule(options().dynamicPort());
-        wireMockRule.start();
+        wireMockServer = new WireMockRule(options().dynamicPort());
+        wireMockServer.start();
         final OneFrameConfiguration config = new OneFrameConfiguration();
         config.setToken("testtoken");
-        config.setBaseUri(String.format("http://localhost:%d/rates", wireMockRule.port()));
+        config.setBaseUri(String.format("http://localhost:%d/rates", wireMockServer.port()));
         oneFrameRateApiClient = new OneFrameRateApiClient(config);
     }
 
+    @AfterEach
+    public void shutdown() {
+        wireMockServer.shutdown();
+    }
+
     @Test
-    public void testGet200() throws Exception {
-        wireMockRule.stubFor(get(urlPathMatching("/rates"))
+    void testGet200() throws Exception {
+        wireMockServer.stubFor(get(urlPathMatching("/rates"))
                                      .withHeader("token", equalTo("testtoken"))
                                      .willReturn(aResponse()
                                                          .withStatus(200)
@@ -56,8 +61,8 @@ public class OneFrameRateApiClientTest {
     }
 
     @Test
-    public void testGet500ThrowException() {
-        wireMockRule.stubFor(get(urlPathMatching("/rates"))
+    void testGet500ThrowException() {
+        wireMockServer.stubFor(get(urlPathMatching("/rates"))
                                      .withHeader("token", equalTo("testtoken"))
                                      .willReturn(aResponse()
                                                          .withStatus(500)));
@@ -65,8 +70,8 @@ public class OneFrameRateApiClientTest {
     }
 
     @Test
-    public void testGetInvalidTimestampReturnResponse() throws Exception {
-        wireMockRule.stubFor(get(urlPathMatching("/rates"))
+    void testGetInvalidTimestampReturnResponse() throws Exception {
+        wireMockServer.stubFor(get(urlPathMatching("/rates"))
                                      .withHeader("token", equalTo("testtoken"))
                                      .willReturn(aResponse()
                                                          .withStatus(200)
@@ -78,8 +83,8 @@ public class OneFrameRateApiClientTest {
     }
 
     @Test
-    public void testConnectionResetByPeerThrowsException() {
-        wireMockRule.stubFor(get(urlPathMatching("/rates"))
+    void testConnectionResetByPeerThrowsException() {
+        wireMockServer.stubFor(get(urlPathMatching("/rates"))
                                      .withHeader("token", equalTo("testtoken"))
                                      .willReturn(aResponse()
                                                          .withStatus(200)

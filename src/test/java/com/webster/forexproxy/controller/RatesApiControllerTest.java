@@ -7,20 +7,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.webster.forexproxy.WireMockInitializer;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = { WireMockInitializer.class})
 @ActiveProfiles("test")
 @SpringBootTest
@@ -30,7 +30,7 @@ public class RatesApiControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getRatesJpyToUsdReturn200() throws Exception {
+    void getRatesJpyToUsdReturn200() throws Exception {
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "JPY")
                                 .param("to", "USD"))
@@ -39,7 +39,7 @@ public class RatesApiControllerTest {
     }
 
     @Test
-    public void getRatesUsdToJpyReturn200() throws Exception {
+    void getRatesUsdToJpyReturn200() throws Exception {
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "USD")
                                 .param("to", "JPY"))
@@ -48,7 +48,7 @@ public class RatesApiControllerTest {
     }
 
     @Test
-    public void getRatesSgdToAudReturn200() throws Exception {
+    void getRatesSgdToAudReturn200() throws Exception {
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "SGD")
                                 .param("to", "AUD"))
@@ -57,7 +57,7 @@ public class RatesApiControllerTest {
     }
 
     @Test
-    public void getRatesReturn400UnsupportedCurrency() throws Exception {
+    void getRatesReturn400UnsupportedCurrency() throws Exception {
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "KRW")
                                 .param("to", "AUD"))
@@ -66,7 +66,7 @@ public class RatesApiControllerTest {
     }
 
     @Test
-    public void getRatesReturn400InvalidRatesRequest() throws Exception {
+    void getRatesReturn400InvalidRatesRequest() throws Exception {
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "USD")
                                 .param("to", "USD"))
@@ -75,7 +75,7 @@ public class RatesApiControllerTest {
     }
 
 //    @Test
-//    public void getRatesReturn500DataNotAvailable() throws Exception {
+//    void getRatesReturn500DataNotAvailable() throws Exception {
 //        mockMvc.perform(get("/v1/rates")
 //                                .param("from", "AUD")
 //                                .param("to", "USD"))
