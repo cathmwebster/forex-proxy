@@ -12,8 +12,6 @@ import lombok.Data;
 @Data
 public class CacheConfig {
     private long expireSeconds;
-    private long initialDelaySeconds;
-    private long refreshPeriodSeconds;
 
     public long getDefaultExpireNanos() {
         return TimeUnit.SECONDS.toNanos(expireSeconds);

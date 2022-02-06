@@ -1,14 +1,10 @@
 package com.webster.forexproxy.cache;
 
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.lang.Nullable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -36,17 +32,9 @@ public class RatesCacheService {
     private final Cache<Currency, RatesCacheObject> ratesCache = Caffeine.newBuilder()
                                                                          .expireAfter(new CacheExpiry())
                                                                          .build();
-    final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
 
-    @PostConstruct
-    public void init() {
-        executor.scheduleAtFixedRate(this::refreshCache,
-                                     cacheConfig.getInitialDelaySeconds(),
-                                     cacheConfig.getRefreshPeriodSeconds(),
-                                     TimeUnit.SECONDS);
-    }
-
-    private void refreshCache() {
+    @Scheduled(initialDelayString = "${cache.initial-delay-ms}", fixedRateString = "${cache.refresh-period-ms}")
+    public void refreshCache() {
         final var request = Currency.getAllValues()
                                             .stream().filter(c -> c != Currency.JPY)
                                             .map(this::generateRequestParam)
@@ -66,7 +54,7 @@ public class RatesCacheService {
             put(Currency.valueOf(res.getTo()), obj);
         }
         
-        log.info("Count of refreshed cache values: {}", response.size());
+        log.info("Count of refreshed cache keys: {}", response.size());
     }
 
     /**
