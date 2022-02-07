@@ -1,8 +1,8 @@
 # forex-proxy
 Http service that returns the latest currency exchange
 
-This web service uses the cross currency exchange method to return the exchange rate A→C.
-By default, JPY→B　is used as the base currency rate. The formula is as followed:
+This web service uses the cross currency exchange method to return the exchange rate AC.
+By default, JPY→A　is used as the base currency rate. The formula is as followed:
 
 ```AC = 1/AB * BC```
 
@@ -102,7 +102,6 @@ This reminded me of the cross currency exchange formula, where if we know the ex
    - I think there could be better handling of parsing One Frame API response
    - What if time_stamp is older than 5 minutes? Forex-proxy assumes that One Frame will respond with time_stamp that is the current datetime.
    - The service will ignore timestamp that cannot be parsed (sometime One Frame responds with an invalid format), but the rate will be available to forex-proxy users anyways
-   - The above points draws the greyline of forex-proxy requirement that the rate returned will not be older than 5 minutes
  - The rates that are not JPY based can be cached based on most requested pairs
    - This will avoid calculating the rate by formula repeatedly and give a faster response to the user
  - If the list of supported currencies grow, the refreshing stragety will need to be revised
