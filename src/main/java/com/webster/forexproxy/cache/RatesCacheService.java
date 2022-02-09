@@ -41,7 +41,6 @@ public class RatesCacheService {
 
     @Scheduled(initialDelayString = "${cache.initial-delay-ms}", fixedRateString = "${cache.refresh-period-ms}")
     public void refreshCache() {
-        System.out.println("refresh period = " + refreshPeriod);
         final var request = Currency.getAllValues()
                                             .stream().filter(c -> c != Currency.JPY)
                                             .map(this::generateRequestParam)
@@ -68,7 +67,7 @@ public class RatesCacheService {
             count++;
         }
         
-        log.info("Count of refreshed cache keys: {}", count);
+        log.info("Count of refreshed cache keys / total in response: {} / {}", count, response.size());
     }
 
     /**

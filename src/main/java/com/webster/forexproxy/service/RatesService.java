@@ -36,10 +36,10 @@ public class RatesService {
 
         if (from == Currency.JPY) {
             final var cachedRate = getFromCacheOrThrowException(to);
-            return Rate.of(cachedRate.getPrice(), cachedRate.getTimestamp().toEpochSecond());
+            return Rate.of(cachedRate.getPrice(), cachedRate.getTimestamp());
         } else if (to == Currency.JPY) {
             final var cachedRate = getFromCacheOrThrowException(from);
-            return Rate.of(getInverse(cachedRate.getPrice()), cachedRate.getTimestamp().toEpochSecond());
+            return Rate.of(getInverse(cachedRate.getPrice()), cachedRate.getTimestamp());
         } else {
             final var cachedFromRate = getFromCacheOrThrowException(from);
             final var cachedToRate = getFromCacheOrThrowException(to);
@@ -68,7 +68,7 @@ public class RatesService {
                 .multiply(toPrice, MathContext.DECIMAL64);
     }
 
-    private long getOldestTimestampEpochSecond(ZonedDateTime date1, ZonedDateTime date2) {
-        return date1.compareTo(date2) > 0 ? date2.toEpochSecond() : date1.toEpochSecond();
+    private ZonedDateTime getOldestTimestampEpochSecond(ZonedDateTime date1, ZonedDateTime date2) {
+        return date1.compareTo(date2) > 0 ? date2 : date1;
     }
 }
