@@ -110,3 +110,5 @@ This reminded me of the cross currency exchange formula, where if we know the ex
    - This will avoid calculating the rate by formula repeatedly and give a faster response to the user
  - If the list of supported currencies grow, the refreshing stragety will need to be revised
    - This means that the size of pairs requested to One Frame will also grow
+ - When a user calls this API right after application starts running, but before the cache is available, the user will get "DataNotAvailable" exception
+   - Ideally, the data should be available immediately after the application starts running

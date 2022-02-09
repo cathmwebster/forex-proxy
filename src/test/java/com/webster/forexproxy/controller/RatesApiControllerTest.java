@@ -31,6 +31,9 @@ public class RatesApiControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    // TODO do not execute test until cache has been "refreshed" for the first time after application is booted
+    // use "await" to wait for the cache to be available
+
     @Test
     void getRatesJpyToUsdReturn200() {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(() -> mockMvc.perform(get("/v1/rates")
