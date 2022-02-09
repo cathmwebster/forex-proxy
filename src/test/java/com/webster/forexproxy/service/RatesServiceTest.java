@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -33,9 +34,8 @@ public class RatesServiceTest {
 
     @Test
     void testGetRatesFromJPYToUSD() throws Exception {
-        var timestamp = Instant.now().getEpochSecond();
         var expected = new BigDecimal("0.71810472617368925");
-        final var mockCache = new RatesCacheObject(expected, timestamp, DEFAULT_CACHE_EXPIRE_NANOS);
+        final var mockCache = new RatesCacheObject(expected, ZonedDateTime.now(), DEFAULT_CACHE_EXPIRE_NANOS);
         given(ratesCacheService.get(Currency.USD)).willReturn(mockCache);
 
         var actual = ratesService.getRates(Currency.JPY, Currency.USD);
@@ -47,7 +47,7 @@ public class RatesServiceTest {
     void testGetRatesFromUSDToJPY() throws Exception {
         var timestamp = Instant.now().getEpochSecond();
         final var mockCache = new RatesCacheObject(new BigDecimal("0.7181047261736892"),
-                                                   timestamp,
+                                                   ZonedDateTime.now(),
                                                    DEFAULT_CACHE_EXPIRE_NANOS);
         given(ratesCacheService.get(Currency.USD)).willReturn(mockCache);
 
@@ -59,13 +59,13 @@ public class RatesServiceTest {
 
     @Test
     void testGetRatesFromUSDToAUD() throws Exception {
-        var timestamp = Instant.now().getEpochSecond();
+        final var now = ZonedDateTime.now();
         final var mockCacheUSD = new RatesCacheObject(new BigDecimal("0.54908647280612891"),
-                                                      timestamp,
+                                                      now.minusMinutes(2),
                                                       DEFAULT_CACHE_EXPIRE_NANOS);
         given(ratesCacheService.get(Currency.USD)).willReturn(mockCacheUSD);
         final var mockCacheAUD = new RatesCacheObject(new BigDecimal("0.71810472617368925"),
-                                                      timestamp,
+                                                      ZonedDateTime.now(),
                                                       DEFAULT_CACHE_EXPIRE_NANOS);
         given(ratesCacheService.get(Currency.AUD)).willReturn(mockCacheAUD);
 
@@ -73,6 +73,8 @@ public class RatesServiceTest {
         var actual = ratesService.getRates(Currency.USD, Currency.AUD);
 
         assertThat(actual).extracting("price").isEqualTo(expected);
+        assertThat(actual).extracting("timestamp").isEqualTo(now.minusMinutes(2).toEpochSecond());
+
     }
 
     @Test

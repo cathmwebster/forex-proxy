@@ -1,6 +1,7 @@
 package com.webster.forexproxy.cache;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +10,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class RatesCacheObject {
     private BigDecimal price;
-    private long timestamp;
+    private ZonedDateTime timestamp;
     private long expiresNanos;
 }

@@ -2,6 +2,7 @@ package com.webster.forexproxy.service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -35,15 +36,15 @@ public class RatesService {
 
         if (from == Currency.JPY) {
             final var cachedRate = getFromCacheOrThrowException(to);
-            return Rate.of(cachedRate.getPrice(), cachedRate.getTimestamp());
+            return Rate.of(cachedRate.getPrice(), cachedRate.getTimestamp().toEpochSecond());
         } else if (to == Currency.JPY) {
             final var cachedRate = getFromCacheOrThrowException(from);
-            return Rate.of(getInverse(cachedRate.getPrice()), cachedRate.getTimestamp());
+            return Rate.of(getInverse(cachedRate.getPrice()), cachedRate.getTimestamp().toEpochSecond());
         } else {
             final var cachedFromRate = getFromCacheOrThrowException(from);
             final var cachedToRate = getFromCacheOrThrowException(to);
             return Rate.of(convertByInverseOnFrom(cachedFromRate.getPrice(), cachedToRate.getPrice()),
-                           Math.max(cachedFromRate.getTimestamp(), cachedToRate.getTimestamp()));
+                           getOldestTimestampEpochSecond(cachedFromRate.getTimestamp(), cachedToRate.getTimestamp()));
         }
     }
 
@@ -65,5 +66,9 @@ public class RatesService {
     private BigDecimal convertByInverseOnFrom(BigDecimal fromPrice, BigDecimal toPrice) {
         return getInverse(fromPrice)
                 .multiply(toPrice, MathContext.DECIMAL64);
+    }
+
+    private long getOldestTimestampEpochSecond(ZonedDateTime date1, ZonedDateTime date2) {
+        return date1.compareTo(date2) > 0 ? date2.toEpochSecond() : date1.toEpochSecond();
     }
 }

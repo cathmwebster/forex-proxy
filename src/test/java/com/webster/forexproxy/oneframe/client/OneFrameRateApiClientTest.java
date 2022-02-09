@@ -79,7 +79,7 @@ public class OneFrameRateApiClientTest {
                                                          .withBody(readJson("oneframe/invalidFormatRes.json"))));
         final var actual = oneFrameRateApiClient.getRates(REQUEST_ALL_CURRENCIES);
         assertThat(actual).hasSize(8);
-        assertThat(actual).extracting("timestamp").containsOnlyOnce(0L);
+        assertThat(actual).extracting("timestamp").containsNull();
     }
 
     @Test

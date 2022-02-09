@@ -1,5 +1,8 @@
 package com.webster.forexproxy.cache;
 
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +50,11 @@ public class RatesCacheService {
             return;
         }
 
+        final var expiredTimestamp = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5);
         for (final var res : response) {
+            if (res.getTimestamp() == null || expiredTimestamp.isAfter(res.getTimestamp())) {
+                continue;
+            }
             final var obj = new RatesCacheObject(res.getPrice(),
                                                  res.getTimestamp(),
                                                  cacheConfig.getDefaultExpireNanos());
