@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class RatesCacheService {
 
+    @Value("${cache.refresh-period-ms}")
+    private String refreshPeriod;
+
     private final CacheConfig cacheConfig;
     private final OneFrameRateApiClient oneFrameRateApiClient;
     private final Cache<Currency, RatesCacheObject> ratesCache = Caffeine.newBuilder()
@@ -37,6 +41,7 @@ public class RatesCacheService {
 
     @Scheduled(initialDelayString = "${cache.initial-delay-ms}", fixedRateString = "${cache.refresh-period-ms}")
     public void refreshCache() {
+        System.out.println("refresh period = " + refreshPeriod);
         final var request = Currency.getAllValues()
                                             .stream().filter(c -> c != Currency.JPY)
                                             .map(this::generateRequestParam)

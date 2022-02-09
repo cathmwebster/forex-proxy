@@ -97,7 +97,6 @@ This reminded me of the cross currency exchange formula, where if we know the ex
  - 
 ## Future improvements
  - Test using wiremock
-   - I wanted to do something like {{now}} to dynamically put the current datetime on the wiremock response, but I was getting parse errors and formatting was not working correctly (it was giving me non-UTC dt, so I ended up just going for putting in a date super far into the future so that tests pass.
    - Need to improve using wiremock (or use a different testing library) to mock One Frame responses
  - A distributed cache will be needed if forex-proxy will run on multiple servers
     - The cache should be synchronized amongst all nodes
