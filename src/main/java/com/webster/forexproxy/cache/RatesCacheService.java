@@ -57,7 +57,7 @@ public class RatesCacheService {
         final var expiredTimestamp = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5);
         for (final var res : response) {
             // ignore responses that couldn't parse the timestamp or has timestamp older than 5 minutes
-            if (res.getTimestamp() == null || expiredTimestamp.isAfter(res.getTimestamp())) {
+            if (res.getTimestamp() == null || res.getTimestamp().isBefore(expiredTimestamp)) {
                 continue;
             }
             final var obj = new RatesCacheObject(res.getPrice(),
