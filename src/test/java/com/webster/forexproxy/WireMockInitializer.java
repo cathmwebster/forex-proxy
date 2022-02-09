@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -20,8 +21,11 @@ public class WireMockInitializer implements ApplicationContextInitializer<Config
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
 
+        // TODO use response template transformer to put dynamic values into mock response
+        // was getting not expected values by trying something like {{now}} for time_stamp
         WireMockServer wireMockServer =
-                new WireMockServer(new WireMockConfiguration().dynamicPort());
+                new WireMockServer(new WireMockConfiguration().dynamicPort()
+                                                              .extensions(new ResponseTemplateTransformer(true)));
 
         wireMockServer.start();
 

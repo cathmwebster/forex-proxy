@@ -3,6 +3,7 @@ package com.webster.forexproxy.oneframe.client;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,7 +37,10 @@ public class OneFrameRateApiClient {
         var request = HttpRequest.newBuilder(uriComponentsBuilder.build().toUri())
                                  .header("token", oneFrameConfiguration.getToken())
                                  .build();
+
         try {
+            var r = client.send(request, BodyHandlers.ofString());
+
             var response = client.send(request, new JsonBodyHandler<>(OneFrameRateApiResponse[].class));
             if (response.statusCode() > 200) {
                 throw new OneFrameApiException("One Frame Rate API returned error status code " + response.statusCode());

@@ -1,11 +1,13 @@
 package com.webster.forexproxy.controller;
 
+import static org.awaitility.Awaitility.await;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,30 +32,31 @@ public class RatesApiControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void getRatesJpyToUsdReturn200() throws Exception {
-        mockMvc.perform(get("/v1/rates")
-                                .param("from", "JPY")
-                                .param("to", "USD"))
-               .andExpect(status().isOk())
-               .andExpect(content().json(readJson("mock/jpyToUsd200.json"), true));
+    void getRatesJpyToUsdReturn200() {
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(() -> mockMvc.perform(get("/v1/rates")
+                                                                                        .param("from", "JPY")
+                                                                                        .param("to", "USD"))
+                                                                       .andExpect(status().isOk())
+                                                                       .andExpect(content().json(readJson("mock/jpyToUsd200.json"), true)));
     }
 
     @Test
     void getRatesUsdToJpyReturn200() throws Exception {
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(() ->
         mockMvc.perform(get("/v1/rates")
                                 .param("from", "USD")
                                 .param("to", "JPY"))
                .andExpect(status().isOk())
-               .andExpect(content().json(readJson("mock/usdToJpy200.json"), true));
+               .andExpect(content().json(readJson("mock/usdToJpy200.json"), true)));
     }
 
     @Test
     void getRatesSgdToAudReturn200() throws Exception {
-        mockMvc.perform(get("/v1/rates")
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(() -> mockMvc.perform(get("/v1/rates")
                                 .param("from", "SGD")
                                 .param("to", "AUD"))
                .andExpect(status().isOk())
-               .andExpect(content().json(readJson("mock/sgdToAud200.json"), true));
+               .andExpect(content().json(readJson("mock/sgdToAud200.json"), true)));
     }
 
     @Test
@@ -74,14 +77,14 @@ public class RatesApiControllerTest {
                .andExpect(content().json(readJson("mock/invalidRatesRequest400.json")));
     }
 
-//    @Test
-//    void getRatesReturn500DataNotAvailable() throws Exception {
-//        mockMvc.perform(get("/v1/rates")
-//                                .param("from", "AUD")
-//                                .param("to", "USD"))
-//               .andExpect(status().isInternalServerError())
-//               .andExpect(content().json(readJson("mock/dataNotAvailable500.json")));
-//    }
+    @Test
+    void getRatesReturn500DataNotAvailable() throws Exception {
+        await().atMost(1, TimeUnit.SECONDS).untilAsserted(() -> mockMvc.perform(get("/v1/rates")
+                                .param("from", "JPY")
+                                .param("to", "NZD"))
+               .andExpect(status().isInternalServerError())
+               .andExpect(content().json(readJson("mock/dataNotAvailable500.json"))));
+    }
 
     private String readJson(String path) throws IOException {
         return new String(new ClassPathResource(path)

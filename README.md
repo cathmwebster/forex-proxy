@@ -93,15 +93,19 @@ This reminded me of the cross currency exchange formula, where if we know the ex
  - The API will validate that the requested currencies are supported, else the API will respond with an error
  - Use in memory cache (https://github.com/ben-manes/caffeine) to cache the rates, expires after five minutes
  - If the requested rates are not in the cache, the API will response with an error
- 
+ - If One Frame responds with time_stamp older than 5 minutes, forex-proxy will ignore it
+ - 
 ## Future improvements
+ - Test using wiremock
+   - I wanted to do something like {{now}} to dynamically put the current datetime on the wiremock response, but I was getting parse errors and formatting was not working correctly (it was giving me non-UTC dt, so I ended up just going for putting in a date super far into the future so that tests pass.
+   - Need to improve using wiremock (or use a different testing library) to mock One Frame responses
  - A distributed cache will be needed if forex-proxy will run on multiple servers
-   - The cache should be synchronized amongst all nodes
-   - Only one server should be scheduled to refresh the cache
+    - The cache should be synchronized amongst all nodes
+    - Only one server should be scheduled to refresh the cache
  - The response from One Frame could be validated better
    - I think there could be better handling of parsing One Frame API response
-   - What if time_stamp is older than 5 minutes? Forex-proxy assumes that One Frame will respond with time_stamp that is the current datetime.
-   - The service will ignore timestamp that cannot be parsed (sometime One Frame responds with an invalid format), but the rate will be available to forex-proxy users anyways
+   - The service will ignore timestamp that cannot be parsed (sometime One Frame responds with an invalid format) and will not cache it
+   - The cache expiry should be the one frame response + 5 minutes (currently, it just sets it to 5 minutes from now assuming one frame timestamp will is now)
  - The rates that are not JPY based can be cached based on most requested pairs
    - This will avoid calculating the rate by formula repeatedly and give a faster response to the user
  - If the list of supported currencies grow, the refreshing stragety will need to be revised
