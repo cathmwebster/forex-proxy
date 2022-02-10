@@ -4,6 +4,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class RatesCacheService {
 
     @Scheduled(initialDelayString = "${cache.initial-delay-ms}", fixedRateString = "${cache.refresh-period-ms}")
     public void refreshCache() {
-        final var now = ZonedDateTime.now(ZoneOffset.UTC);
+        final var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
         final var expiredTimestamp = now
                                                   .minusNanos(cacheConfig.getDefaultExpireNanos());
         final var request = Currency.getAllValues()
@@ -60,17 +61,18 @@ public class RatesCacheService {
 
         int count = 0;
         for (final var res : response) {
+            final var timestamp = res.getTimestamp();
             // ignore responses that couldn't parse the timestamp or has timestamp older than 5 minutes
-            if (res.getTimestamp() == null || res.getTimestamp().isBefore(expiredTimestamp)) {
+            if (timestamp == null || timestamp.isBefore(expiredTimestamp)) {
                 continue;
             }
 
             // get the expire nanos by the difference between now and timestamp + 5 minutes
-            final var expiresAt = res.getTimestamp()
+            final var expiresAt = timestamp
                                      .plusNanos(cacheConfig.getDefaultExpireNanos());
             final var expireNanos = ChronoUnit.NANOS.between(now, expiresAt);
             final var obj = new RatesCacheObject(res.getPrice(),
-                                                 res.getTimestamp(),
+                                                 timestamp,
                                                  expireNanos);
             put(Currency.valueOf(res.getTo()), obj);
             count++;
