@@ -2,6 +2,7 @@ package com.webster.forexproxy.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,9 +36,6 @@ public class RatesCacheServiceTest {
         await().atMost(5, TimeUnit.SECONDS)
                .untilAsserted(() -> verify(ratesCacheService, times(5))
                        .refreshCache());
-
-        ratesCacheService.refreshCache();
-        assertThat(ratesCacheService.get(Currency.NZD)).isNull();
     }
 
     @Test
@@ -45,8 +43,6 @@ public class RatesCacheServiceTest {
         ratesCacheService.refreshCache();
         assertThat(ratesCacheService.get(Currency.NZD)).isNull();
         assertThat(ratesCacheService.get(Currency.USD)).isNotNull();
-        assertThat(ratesCacheService.get(Currency.USD)).extracting("expiresNanos")
-                                                       .isEqualTo(300000000000L);
         assertThat(ratesCacheService.get(Currency.USD)).extracting("price")
                                                        .isEqualTo(new BigDecimal("0.54908647280612891"));
     }

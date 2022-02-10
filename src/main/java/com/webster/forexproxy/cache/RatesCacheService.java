@@ -2,7 +2,9 @@ package com.webster.forexproxy.cache;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +43,9 @@ public class RatesCacheService {
 
     @Scheduled(initialDelayString = "${cache.initial-delay-ms}", fixedRateString = "${cache.refresh-period-ms}")
     public void refreshCache() {
+        final var now = ZonedDateTime.now(ZoneOffset.UTC);
+        final var expiredTimestamp = now
+                                                  .minusNanos(cacheConfig.getDefaultExpireNanos());
         final var request = Currency.getAllValues()
                                             .stream().filter(c -> c != Currency.JPY)
                                             .map(this::generateRequestParam)
@@ -54,15 +59,19 @@ public class RatesCacheService {
         }
 
         int count = 0;
-        final var expiredTimestamp = ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(5);
         for (final var res : response) {
             // ignore responses that couldn't parse the timestamp or has timestamp older than 5 minutes
             if (res.getTimestamp() == null || res.getTimestamp().isBefore(expiredTimestamp)) {
                 continue;
             }
+
+            // get the expire nanos by the difference between now and timestamp + 5 minutes
+            final var expiresAt = res.getTimestamp()
+                                     .plusNanos(cacheConfig.getDefaultExpireNanos());
+            final var expireNanos = ChronoUnit.NANOS.between(now, expiresAt);
             final var obj = new RatesCacheObject(res.getPrice(),
                                                  res.getTimestamp(),
-                                                 cacheConfig.getDefaultExpireNanos());
+                                                 expireNanos);
             put(Currency.valueOf(res.getTo()), obj);
             count++;
         }

@@ -25,6 +25,7 @@ import lombok.SneakyThrows;
 
 public class WireMockInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
+    public static final ZonedDateTime NOW_UTC = ZonedDateTime.now(ZoneOffset.UTC);
     @SneakyThrows
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -50,9 +51,9 @@ public class WireMockInitializer implements ApplicationContextInitializer<Config
                         .stream()
                         .peek(r -> {
                             if ("NZD".equals(r.getTo())) {
-                                r.setTimestamp(ZonedDateTime.now(ZoneOffset.UTC).minusMinutes(6));
+                                r.setTimestamp(NOW_UTC.minusMinutes(6));
                             } else {
-                                r.setTimestamp(ZonedDateTime.now(ZoneOffset.UTC));
+                                r.setTimestamp(NOW_UTC.now(ZoneOffset.UTC));
                             }
                         })
                         .collect(Collectors.toList());
