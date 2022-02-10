@@ -44,7 +44,7 @@ public class RatesCacheService {
 
     @Scheduled(initialDelayString = "${cache.initial-delay-ms}", fixedRateString = "${cache.refresh-period-ms}")
     public void refreshCache() {
-        final var now = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
+        final var now = ZonedDateTime.now(ZoneOffset.UTC);
         final var expiredTimestamp = now
                                                   .minusNanos(cacheConfig.getDefaultExpireNanos());
         final var request = Currency.getAllValues()

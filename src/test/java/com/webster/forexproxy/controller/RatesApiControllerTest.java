@@ -40,12 +40,15 @@ public class RatesApiControllerTest {
                                                                                         .param("from", "JPY")
                                                                                         .param("to", "USD"))
                                                                        .andExpect(status().isOk())
+                                                                       .andExpect(jsonPath(
+                                                                               "$.result.timestamp").value(
+                                                                               WireMockInitializer.NOW_UTC.toEpochSecond()))
                                                                        .andExpect(content().json(readJson(
                                                                                "mock/jpyToUsd200.json"))));
     }
 
     @Test
-    void getRatesUsdToJpyReturn200() throws Exception {
+    void getRatesUsdToJpyReturn200() {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(() ->
                                                                   mockMvc.perform(get("/v1/rates")
                                                                                           .param("from", "USD")
@@ -60,7 +63,7 @@ public class RatesApiControllerTest {
     }
 
     @Test
-    void getRatesSgdToAudReturn200() throws Exception {
+    void getRatesSgdToAudReturn200() {
         await().atMost(1, TimeUnit.SECONDS).untilAsserted(() -> mockMvc.perform(get("/v1/rates")
                                                                                         .param("from", "SGD")
                                                                                         .param("to", "AUD"))

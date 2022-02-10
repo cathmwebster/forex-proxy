@@ -3,11 +3,11 @@ package com.webster.forexproxy;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.webster.forexproxy.TestUtil.toJson;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,7 +25,7 @@ import lombok.SneakyThrows;
 
 public class WireMockInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-    public static final ZonedDateTime NOW_UTC = ZonedDateTime.now(ZoneOffset.UTC);
+    public static final ZonedDateTime NOW_UTC = ZonedDateTime.now(ZoneOffset.UTC).truncatedTo(ChronoUnit.MILLIS);
     @SneakyThrows
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
@@ -52,8 +52,10 @@ public class WireMockInitializer implements ApplicationContextInitializer<Config
                         .peek(r -> {
                             if ("NZD".equals(r.getTo())) {
                                 r.setTimestamp(NOW_UTC.minusMinutes(6));
+                            } else if ("GBP".equals(r.getTo())) {
+                                r.setTimestamp(NOW_UTC.minusMinutes(1));
                             } else {
-                                r.setTimestamp(NOW_UTC.now(ZoneOffset.UTC));
+                                r.setTimestamp(NOW_UTC);
                             }
                         })
                         .collect(Collectors.toList());

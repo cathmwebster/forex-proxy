@@ -41,9 +41,23 @@ public class RatesCacheServiceTest {
     @Test
     void testCacheGet() {
         ratesCacheService.refreshCache();
-        assertThat(ratesCacheService.get(Currency.NZD)).isNull();
-        assertThat(ratesCacheService.get(Currency.USD)).isNotNull();
-        assertThat(ratesCacheService.get(Currency.USD)).extracting("price")
-                                                       .isEqualTo(new BigDecimal("0.54908647280612891"));
+        var nzdRate = ratesCacheService.get(Currency.NZD);
+        assertThat(nzdRate).isNull();
+
+        var usdRate = ratesCacheService.get(Currency.USD);
+        assertThat(usdRate).isNotNull();
+        assertThat(usdRate).extracting("price")
+                           .isEqualTo(new BigDecimal("0.54908647280612891"));
+        assertThat(usdRate).extracting("timestamp")
+                           .isEqualTo(WireMockInitializer.NOW_UTC);
+        // I want to assert that the expire nanos is no more than 5 minutes
+        assertTrue(usdRate.getExpiresNanos() <= TimeUnit.SECONDS.toNanos(300));
+
+        var gbpRate = ratesCacheService.get(Currency.GBP);
+        assertThat(usdRate).isNotNull();
+        assertThat(gbpRate).extracting("timestamp")
+                           .isEqualTo(WireMockInitializer.NOW_UTC.minusMinutes(1));
+        // I want to assert that the expire nanos is no more than 4 minutes
+        assertTrue(gbpRate.getExpiresNanos() <= TimeUnit.SECONDS.toNanos(240));
     }
 }
